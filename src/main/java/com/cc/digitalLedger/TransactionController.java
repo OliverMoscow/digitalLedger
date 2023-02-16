@@ -34,7 +34,7 @@ class TransactionController {
     @PostMapping("/send")
     Transaction newTransaction(@RequestBody Transaction newTransaction) {
         //Check if transaction is valid
-        //transaction should have a previous transaction
+
         //add transaction to repository
         //return receipt of transaction history
         return repository.save(newTransaction);
