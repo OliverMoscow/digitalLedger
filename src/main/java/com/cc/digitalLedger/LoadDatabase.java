@@ -13,9 +13,11 @@ class LoadDatabase {
 
     @Bean
     CommandLineRunner initDatabase(TransactionRepository repository) {
-
         return args -> {
-            log.info("Preloading " + repository.save(new Transaction("Alice", "Bob",20.22, null)));
+            log.info("Preloading " + repository.save(new Transaction("000", "111",82.85)));
+            log.info("Preloading " + repository.save(new Transaction("000", "222",17.35)));
+            log.info("Preloading " + repository.save(new Transaction("111", "222",3.02)));
+            log.info("Preloading " + repository.save(new Transaction("222", "000",32.54)));
         };
     }
 }
