@@ -1,6 +1,7 @@
 package com.cc.digitalLedger;
 
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.crypto.NoSuchPaddingException;
 
 @RestController
 class TransactionController {
@@ -26,7 +29,7 @@ class TransactionController {
     }
 
     @GetMapping("/transactions/{publicKey}")
-    UserTransactions allWithPublicKey(@PathVariable String publicKey) {
+    UserTransactions allWithPublicKey(@PathVariable String publicKey) throws NoSuchPaddingException, NoSuchAlgorithmException {
         List<Transaction> sent = repository.findBySender(publicKey);
         List<Transaction> received = repository.findByReceiver(publicKey);
         return new UserTransactions(publicKey,sent,received);
