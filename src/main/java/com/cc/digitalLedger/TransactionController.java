@@ -53,7 +53,7 @@ class TransactionController {
         //add transaction to repository
 //        repository.save(data)
         //return added transaction
-        return null;
+        return repository.save(new Transaction("alice", "bob", 12.20));
 //        .orElseThrow(() -> new EmployeeNotFoundException(id));
     }
 
