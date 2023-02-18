@@ -17,8 +17,12 @@ class LoadDatabase {
     @Bean
     CommandLineRunner initDatabase(TransactionRepository repository) {
         return args -> {
-            for(Transaction t: Ledger.load()) {
-                log.info("Preloading " + repository.save(t));
+            Backup<Transaction> backup = new Backup<>(Backup.FileName.ledger);
+            List<Transaction> data = backup.load();
+            if(data != null) {
+                for(Transaction t: data) {
+                    log.info("Preloading " + repository.save(t));
+                }
             }
         };
     }

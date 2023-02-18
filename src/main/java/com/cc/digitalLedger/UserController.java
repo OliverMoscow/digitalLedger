@@ -36,6 +36,13 @@ class UserController {
     }
     @PostMapping("/newUser")
     User newEmployee(@RequestBody User newUser) {
-        return repository.save(newUser);
+        //TODO - Check if user already exists
+        //TODO - Throw and error if it doesn't
+        //Add new user
+        User res = repository.save(newUser);
+        //Save backup
+        Backup<User> b = new Backup<>(Backup.FileName.users);
+        b.backup(repository.findAll());
+        return res;
     }
 }

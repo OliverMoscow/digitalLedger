@@ -1,23 +1,12 @@
 package com.cc.digitalLedger;
 
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.List;
 
-import org.apache.tomcat.util.codec.binary.Base64;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.security.*;
 
 @RestController
 class TransactionController {
@@ -40,42 +29,21 @@ class TransactionController {
         return new UserTransactions(publicKey,sent,received);
     }
     @PostMapping("/send")
-    Transaction send(@RequestBody NewTransaction data) throws NoSuchAlgorithmException, InvalidKeySpecException, SignatureException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+    Transaction send(@RequestBody NewTransaction data) {
         //Check if transaction is valid
         //convert newTransaction to Transaction
-        decrypt(data);
+        Decrypter decrypter = new Decrypter(data);
+        DecryptResponse response = decrypter.decrypt();
+        Transaction t = response.transaction
+                .orElseThrow(() -> new InvalidTransactionExeption(response.errorMessage));
 
-
-        //save backup of ledger
         //add transaction to repository
-        //repository.save(data)
+        repository.save(t);
+        //save backup of ledger
+        Backup<Transaction> b = new Backup<>(Backup.FileName.ledger);
+        b.backup(repository.findAll());
         //return added transaction
-        return null;
-        //.orElseThrow(() -> new EmployeeNotFoundException(id));
-    }
-
-    NewTransaction decrypt(NewTransaction data) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-            NewTransaction newT = data;
-            //convert public key from string type to Public Key type
-            String publicKey = newT.sender;
-            byte[] publicBytes = Base64.decodeBase64(publicKey);
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            PublicKey pubKey = keyFactory.generatePublic(keySpec);
-
-            Cipher cipher = Cipher.getInstance("RSA");
-            cipher.init(Cipher.DECRYPT_MODE, pubKey);
-
-            String encryptedMessage = newT.encrypted;
-            byte[] decryptedBytes = cipher.doFinal(encryptedMessage.getBytes());
-            String decryptedMessage = new String(decryptedBytes);
-
-            String receiver = newT.receiver;
-            double amount = newT.amount;
-
-            data = new Transaction(publicKey, decryptedMessage, receiver, amount);
-
-        return data;
+        return t;
     }
 
 
@@ -105,14 +73,10 @@ class TransactionController {
 class NewTransaction {
     String sender;
     String encrypted;
-    String receiver;
-    double amount;
 
-    public NewTransaction(String sender, String encrypted, String receiver, double amount) {
+    public NewTransaction(String sender, String encrypted) {
         this.sender = sender;
         this.encrypted = encrypted;
-        this.receiver = receiver;
-        this.amount = amount;
     }
 }
 
@@ -128,4 +92,5 @@ class UserTransactions {
         this.received = received;
     }
 }
+
 
