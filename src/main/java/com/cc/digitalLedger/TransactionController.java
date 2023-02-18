@@ -31,7 +31,7 @@ class TransactionController {
     @PostMapping("/send")
     Transaction send(@RequestBody NewTransaction data) {
         //Check if transaction is valid
-        //convert newTransaction to Transaction
+        //Decrypter will return an optional Transaction from a NewTransaction
         Decrypter decrypter = new Decrypter(data);
         DecryptResponse response = decrypter.decrypt();
         Transaction t = response.transaction

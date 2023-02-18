@@ -35,14 +35,17 @@ class UserController {
         return repository.findByName(name);
     }
     @PostMapping("/newUser")
-    User newEmployee(@RequestBody User newUser) {
-        //TODO - Check if user already exists
-        //TODO - Throw and error if it doesn't
-        //Add new user
-        User res = repository.save(newUser);
-        //Save backup
-        Backup<User> b = new Backup<>(Backup.FileName.users);
-        b.backup(repository.findAll());
-        return res;
+    User newUser(@RequestBody User newUser) {
+        //Check if user already exists
+        if (newUser.equals(repository.findByPublicKey(newUser.getPublicKey()))) {
+            return newUser;
+        } else {
+            //Add new user
+            User response = repository.save(newUser);
+            //Save backup
+            Backup<User> b = new Backup<>(Backup.FileName.users);
+            b.backup(repository.findAll());
+            return response;
+        }
     }
 }
