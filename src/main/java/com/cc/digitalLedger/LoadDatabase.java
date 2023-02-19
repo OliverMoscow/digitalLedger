@@ -15,7 +15,7 @@ class LoadDatabase {
 
 
     @Bean
-    CommandLineRunner initDatabase(TransactionRepository repository) {
+    CommandLineRunner initLedgerDatabase(TransactionRepository repository) {
         return args -> {
             Backup<Transaction> backup = new Backup<>(Backup.FileName.ledger);
             List<Transaction> data = backup.load();
@@ -27,9 +27,11 @@ class LoadDatabase {
         };
     }
     @Bean
-    CommandLineRunner initDatabase(UserRepository repository) {
+    CommandLineRunner initUsersDatabase(UserRepository repository) {
         return args -> {
-            log.info("Preloading " + repository.save(new User()));
+            log.info("Preloading " + repository.save(new User("Vincent", "195609")));
+            log.info("Preloading " + repository.save(new User("Oliver", "904359")));
+            log.info("Preloading " + repository.save(new User("Kalie", "320197")));
         };
     }
 }
