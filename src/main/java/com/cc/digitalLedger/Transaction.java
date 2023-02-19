@@ -1,8 +1,6 @@
 package com.cc.digitalLedger;
 
 
-import java.util.Objects;
-
 import jakarta.persistence.*;
 
 @Entity

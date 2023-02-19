@@ -1,7 +1,5 @@
 package com.cc.digitalLedger;
 
-import org.apache.tomcat.util.codec.binary.Base64;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -12,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.Optional;
 
 public class Decrypter {
@@ -25,7 +24,7 @@ public class Decrypter {
         try {
             //convert public key from string type to Public Key type
             String publicKey = input.sender;
-            byte[] publicBytes = Base64.decodeBase64(publicKey);
+            byte[] publicBytes = Base64.getDecoder().decode(publicKey) ;
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicBytes);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             PublicKey pubKey = keyFactory.generatePublic(keySpec);
