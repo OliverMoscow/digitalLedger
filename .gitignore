@@ -32,6 +32,5 @@ build/
 ### VS Code ###
 .vscode/
 
-### DIGITAL LEDGER SPECIFIC ###
-ledger.txt
-users.txt
+### APPLICATION SPECIFIC ###
+backup

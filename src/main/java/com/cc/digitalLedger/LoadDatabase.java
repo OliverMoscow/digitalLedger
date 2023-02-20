@@ -20,8 +20,10 @@ class LoadDatabase {
             Backup<Transaction> backup = new Backup<>(Backup.FileName.ledger);
             List<Transaction> data = backup.load();
             if(data != null) {
+                System.out.println("Recovering... Initialized database with transactions: ");
                 for(Transaction t: data) {
-                    log.info("Preloading " + repository.save(t));
+                    repository.save(t);
+                    System.out.println(t);
                 }
             }
         };
@@ -32,8 +34,10 @@ class LoadDatabase {
             Backup<User> backup = new Backup<>(Backup.FileName.users);
             List<User> data = backup.load();
             if(data != null) {
+                System.out.println("Recovering... Initialized database with users: ");
                 for(User u: data) {
-                    log.info("Preloading " + repository.save(u));
+                    repository.save(u);
+                    System.out.println(u.getName());
                 }
             }
         };

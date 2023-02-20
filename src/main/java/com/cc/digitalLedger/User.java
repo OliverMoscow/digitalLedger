@@ -3,6 +3,7 @@ package com.cc.digitalLedger;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 
 import jakarta.persistence.*;
 
@@ -45,4 +46,14 @@ class User implements Serializable {
         User user = (User) o;
         return Objects.equals(id, user.id) && Objects.equals(name, user.name) && Objects.equals(publicKey, user.publicKey);
     }
+
+    public Optional<User> shouldAddTo(UserRepository repository) {
+        if (this.equals(repository.findByPublicKey(publicKey)) ||
+                this.equals(repository.findByName(name))) {
+            return null;
+        } else {
+            return Optional.of(this);
+        }
+    }
+
 }

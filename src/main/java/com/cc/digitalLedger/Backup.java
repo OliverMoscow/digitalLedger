@@ -33,19 +33,24 @@ public class Backup<T> {
         }
     }
     private List<T> readBackup() throws IOException, ClassNotFoundException {
+        File backupFile = new File(filename);
+        if (!backupFile.exists()) {
+            backupFile.createNewFile();
+            return null;
+        }
         List<T> restoredData = null;
         try {
-            FileInputStream fis = new FileInputStream(filename);
+            FileInputStream fis = new FileInputStream(backupFile);
             ObjectInputStream ois = new ObjectInputStream(fis);
             restoredData = (List<T>) ois.readObject();
             ois.close();
             fis.close();
         } catch (EOFException e) {
-            e.printStackTrace();
-            return null;
+            // handle the exception
         }
         return restoredData;
     }
+
 
     private void updateBackup(List<T> data) throws IOException {
         FileOutputStream fos = new FileOutputStream(filename);

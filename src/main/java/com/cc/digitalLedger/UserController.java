@@ -25,25 +25,27 @@ class UserController {
 
     @GetMapping("/users/{publicKey}")
     User fromKey(@PathVariable String publicKey) {
-        return repository.findByPublicKey(publicKey);
+        return repository.findByPublicKey(publicKey)
+                .orElseThrow(() -> new InvalidUserExeption("User not found"));
+
     }
 
-    @GetMapping("/users/{name}")
+    @GetMapping("/users/name/{name}")
     User fromName(@PathVariable String name) {
-        return repository.findByName(name);
+        return repository.findByName(name)
+                .orElseThrow(() -> new InvalidUserExeption("User not found"));
     }
     @PostMapping("/newUser")
     User newUser(@RequestBody User newUser) {
         //Check if user already exists
-        if (newUser.equals(repository.findByPublicKey(newUser.getPublicKey()))) {
-            return newUser;
-        } else {
-            //Add new user
-            User response = repository.save(newUser);
-            //Save backup
-            Backup<User> b = new Backup<>(Backup.FileName.users);
-            b.backup(repository.findAll());
-            return response;
-        }
+        //This function returns an optional user.
+        // Will be null if there is a user already found with same email or public key.
+        User u = newUser.shouldAddTo(repository)
+                .orElseThrow(() -> new InvalidUserExeption());
+        User response = repository.save(u);
+        //Save backup
+        Backup<User> b = new Backup<>(Backup.FileName.users);
+        b.backup(repository.findAll());
+        return response;
     }
 }
