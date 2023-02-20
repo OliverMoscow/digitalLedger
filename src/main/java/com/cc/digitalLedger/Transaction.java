@@ -3,18 +3,20 @@ package com.cc.digitalLedger;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name = "LEDGER")
-class Transaction {
+class Transaction implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "SENDER")
+    @Column(name = "SENDER", columnDefinition = "Text", length = 2000)
     private String sender;
-    @Column(name = "RECEIVER")
+    @Column(name = "RECEIVER", columnDefinition = "Text", length = 2000)
     private String receiver;
     @Column(name = "AMOUNT")
     private Double amount;

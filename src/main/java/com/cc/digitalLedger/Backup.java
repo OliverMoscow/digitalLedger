@@ -13,14 +13,13 @@ public class Backup<T> {
     }
 
     public Backup(FileName name) {
-        this.filename = name.name() + ".txt";
+        this.filename = name.name() + ".ser";
     }
 
     public List<T> load() {
-        File backup = findBackup();
         try {
-            return readBackup(backup);
-        } catch (FileNotFoundException e) {
+            return readBackup();
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
             return null;
         }
@@ -33,67 +32,28 @@ public class Backup<T> {
             e.printStackTrace();
         }
     }
-
-    private File findBackup() {
+    private List<T> readBackup() throws IOException, ClassNotFoundException {
+        List<T> restoredData = null;
         try {
-            File f = new File(filename);
-            f.createNewFile();
-            return f;
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
+            FileInputStream fis = new FileInputStream(filename);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            restoredData = (List<T>) ois.readObject();
+            ois.close();
+            fis.close();
+        } catch (EOFException e) {
             e.printStackTrace();
             return null;
         }
-    }
-    private List<T> readBackup(File backup) throws FileNotFoundException {
-        String content = readFileContent(backup);
-        if(content != null && content != "") {
-            return deserialize(content);
-        } else {
-            return null;
-        }
-    }
-
-    private String readFileContent(File f) throws FileNotFoundException {
-        Scanner myReader = new Scanner(f);
-        String s = "";
-        while (myReader.hasNextLine()) {
-            s += myReader.nextLine();
-        }
-        myReader.close();
-        return s;
+        return restoredData;
     }
 
     private void updateBackup(List<T> data) throws IOException {
-        String serialized = serialize(data);
-        FileWriter myWriter = new FileWriter(filename,false);
-        myWriter.write(serialized);
-        myWriter.close();
+        FileOutputStream fos = new FileOutputStream(filename);
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
+        oos.writeObject(data);
+        oos.close();
+        fos.close();
         System.out.println("Backup Successful!");
-    }
-
-    private String serialize(List<T> transactions) throws IOException {
-        ByteArrayOutputStream bo = new ByteArrayOutputStream();
-        ObjectOutputStream so = new ObjectOutputStream(bo);
-        so.writeObject(transactions);
-        so.flush();
-        return bo.toString();
-    }
-
-    private List<T> deserialize(String s) {
-        byte b[] = s.getBytes();
-        ByteArrayInputStream bi = new ByteArrayInputStream(b);
-        ObjectInputStream si = null;
-        try {
-            si = new ObjectInputStream(bi);
-            return (List<T>) si.readObject();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
 }

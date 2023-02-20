@@ -1,13 +1,14 @@
 package com.cc.digitalLedger;
 
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "USERS")
-class User {
+class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -15,7 +16,7 @@ class User {
     private Long id;
     @Column(name = "NAME")
     private String name;
-    @Column(name = "PUBLIC_KEY")
+    @Column(name = "PUBLIC_KEY", columnDefinition = "Text", length = 2000)
     private String publicKey;
 
     public User(String name, String publicKey) {

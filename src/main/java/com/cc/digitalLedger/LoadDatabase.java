@@ -29,9 +29,13 @@ class LoadDatabase {
     @Bean
     CommandLineRunner initUsersDatabase(UserRepository repository) {
         return args -> {
-            log.info("Preloading " + repository.save(new User("Vincent", "195609")));
-            log.info("Preloading " + repository.save(new User("Oliver", "904359")));
-            log.info("Preloading " + repository.save(new User("Kalie", "320197")));
+            Backup<User> backup = new Backup<>(Backup.FileName.users);
+            List<User> data = backup.load();
+            if(data != null) {
+                for(User u: data) {
+                    log.info("Preloading " + repository.save(u));
+                }
+            }
         };
     }
 }
