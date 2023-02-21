@@ -11,7 +11,10 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
+import org.json.JSONObject;
+
 
 public class Decrypter {
     private NewTransaction input;
@@ -19,7 +22,7 @@ public class Decrypter {
         this.input = input;
     }
 
-    public DecryptResponse decrypt() {
+    public DecryptResponse decrypt(UserRepository repository) {
         DecryptResponse response = new DecryptResponse("Could not decrypt transaction. ", null);
         try {
             //convert public key from string type to Public Key type
@@ -37,22 +40,23 @@ public class Decrypter {
             byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
             String decryptedMessage = new String(decryptedBytes);
             //extract the username and amount
+            JSONObject json = new JSONObject(decryptedMessage);
+            String receiver = json.getString("receiver");
+            double amount = json.getDouble("amount");
             //search for user based on receiver username
+            List<User> r = repository.findByName(receiver);
+            if (r.size() != 1) {
+                response.transaction = null;
+                response.errorMessage += "Could not find receiver in db. Make sure you are sending to a user with an existing account.";
+                return response;
+            }
+            receiver = r.get(0).getPublicKey();
             //create a new transaction based on that info
-
-            Transaction t = new Transaction();
+            Transaction t = new Transaction(input.sender, receiver, amount);
             response.transaction = Optional.of(t);
             if(notEnoughFunds(t)) {
                 response.transaction = null;
                 response.errorMessage += "User does not have enough funds. ";
-            }
-            if(senderNotFound(t)) {
-                response.transaction = null;
-                response.errorMessage += "Could not find sender in db. Please add a new user first. ";
-            }
-            if(receiverNotFound(t)) {
-                response.transaction = null;
-                response.errorMessage += "Could not find receiver in db. Make sure you are sending to a user with an existing account.  ";
             }
             //Catch every exception and update error message
         }  catch (NoSuchPaddingException e) {
@@ -69,15 +73,6 @@ public class Decrypter {
             response.errorMessage += e.getMessage();
         }
         return response;
-    }
-
-
-    private boolean receiverNotFound(Transaction t) {
-        return false;
-    }
-
-    private boolean senderNotFound(Transaction t) {
-        return false;
     }
 
     private boolean notEnoughFunds(Transaction t) {
