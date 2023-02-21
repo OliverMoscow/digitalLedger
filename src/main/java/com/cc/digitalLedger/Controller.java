@@ -49,8 +49,13 @@ class Controller {
     }
 
 
-    @GetMapping("/balance/{publicKey}")
-    double getBalanceFromPublicKey(@PathVariable String publicKey) {
+    @GetMapping("/balance/{name}")
+    Object getBalanceFromPublicKey(@PathVariable String name) {
+        List<User> match = userRepository.findByName(name);
+        if(match.size() != 1) {
+            return null;
+        }
+        String publicKey = match.get(0).getPublicKey();
         //get all sent and received transactions for given public key.
         //query functions are in TransactionController
         return balance(publicKey);
