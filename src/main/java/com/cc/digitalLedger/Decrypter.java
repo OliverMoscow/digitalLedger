@@ -33,9 +33,14 @@ public class Decrypter {
             cipher.init(Cipher.DECRYPT_MODE, pubKey);
 
             String encryptedMessage = input.encrypted;
-            byte[] decryptedBytes = cipher.doFinal(encryptedMessage.getBytes());
+            byte[] encryptedBytes = Base64.getDecoder().decode(encryptedMessage); // decode from base64 format
+            byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
             String decryptedMessage = new String(decryptedBytes);
-            Transaction t = new Transaction(publicKey, "receiver", 0.00);
+            //extract the username and amount
+            //search for user based on receiver username
+            //create a new transaction based on that info
+
+            Transaction t = new Transaction();
             response.transaction = Optional.of(t);
             if(notEnoughFunds(t)) {
                 response.transaction = null;
@@ -65,6 +70,7 @@ public class Decrypter {
         }
         return response;
     }
+
 
     private boolean receiverNotFound(Transaction t) {
         return false;

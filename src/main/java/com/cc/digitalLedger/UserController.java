@@ -23,29 +23,42 @@ class UserController {
         return repository.findAll();
     }
 
-    @GetMapping("/users/{publicKey}")
-    User fromKey(@PathVariable String publicKey) {
-        return repository.findByPublicKey(publicKey)
-                .orElseThrow(() -> new InvalidUserExeption("User not found"));
-
+    @PostMapping("/users")
+    User fromKey(@RequestBody User u) {
+//        if (u.getPublicKey() != null) {
+//            return repository.findByPublicKey(u.getPublicKey())
+//                    .orElseThrow(() -> new InvalidUserExeption("User not found"));
+//        }
+//        if (u.getName() != null) {
+//            return repository.findByPublicKey(u.getPublicKey())
+//                    .orElseThrow(() -> new InvalidUserExeption("User not found"));
+//        }
+        throw new InvalidUserExeption("no username or public key provided");
     }
 
     @GetMapping("/users/name/{name}")
     User fromName(@PathVariable String name) {
-        return repository.findByName(name)
-                .orElseThrow(() -> new InvalidUserExeption("User not found"));
+        List<User> res = repository.findByName(name);
+        if(res.size() == 1) {
+            return res.get(0);
+        }
+        return null;
+//        return repository.findByName(name)
+//                .orElseThrow(() -> new InvalidUserExeption("User not found"));
     }
     @PostMapping("/newUser")
     User newUser(@RequestBody User newUser) {
         //Check if user already exists
         //This function returns an optional user.
         // Will be null if there is a user already found with same email or public key.
-        User u = newUser.shouldAddTo(repository)
-                .orElseThrow(() -> new InvalidUserExeption());
-        User response = repository.save(u);
-        //Save backup
-        Backup<User> b = new Backup<>(Backup.FileName.users);
-        b.backup(repository.findAll());
-        return response;
+        if (newUser.shouldAddTo(repository)) {
+            User response = repository.save(newUser);
+            //Save backup
+            Backup<User> b = new Backup<>(Backup.FileName.users);
+            b.backup(repository.findAll());
+            return response;
+        } else {
+            return null;
+        }
     }
 }
