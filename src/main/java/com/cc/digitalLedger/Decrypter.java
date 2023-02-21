@@ -50,10 +50,16 @@ public class Decrypter {
                 response.errorMessage += "Could not find receiver in db. Make sure you are sending to a user with an existing account.";
                 return response;
             }
-            receiver = r.get(0).getPublicKey();
+            //search for user based on receiver username
+            List<User> s = repository.findByName(input.senderName);
+            if (s.size() != 1) {
+                response.transaction = null;
+                response.errorMessage += "Could not find sender in db. Please add an account and try again.";
+                return response;
+            }
             //create a new transaction based on that info
-            Transaction t = new Transaction(input.sender, receiver, amount);
-            response.transaction = Optional.of(t);
+            Transaction t = new Transaction(s.get(0).getName(), r.get(0).getName(), amount);
+            response.transaction = t;
             if(notEnoughFunds(t)) {
                 response.transaction = null;
                 response.errorMessage += "User does not have enough funds. ";
@@ -82,9 +88,9 @@ public class Decrypter {
 
 class DecryptResponse {
     public String errorMessage;
-    public Optional<Transaction> transaction;
+    public Transaction transaction;
 
-    public DecryptResponse(String errorMessage, Optional<Transaction> transaction) {
+    public DecryptResponse(String errorMessage, Transaction transaction) {
         this.errorMessage = errorMessage;
         this.transaction = transaction;
     }

@@ -36,8 +36,10 @@ class Controller {
         //Decrypter will return an optional Transaction from a NewTransaction
         Decrypter decrypter = new Decrypter(data);
         DecryptResponse response = decrypter.decrypt(userRepository);
-        Transaction t = response.transaction
-                .orElseThrow(() -> new InvalidTransactionExeption(response.errorMessage));
+        Transaction t = response.transaction;
+        if (t == null) {
+            throw new InvalidTransactionExeption(response.errorMessage);
+        }
 
         //add transaction to repository
         transactionRepository.save(t);
@@ -51,19 +53,19 @@ class Controller {
 
     @GetMapping("/balance/{name}")
     Object getBalanceFromPublicKey(@PathVariable String name) {
-        List<User> match = userRepository.findByName(name);
-        if(match.size() != 1) {
-            return null;
-        }
-        String publicKey = match.get(0).getPublicKey();
+//        List<User> match = userRepository.findByName(name);
+//        if(match.size() != 1) {
+//            return null;
+//        }
+//        String publicKey = match.get(0).getPublicKey();
         //get all sent and received transactions for given public key.
         //query functions are in TransactionController
-        return balance(publicKey);
+        return balance(name);
     }
 
-    private double balance(String publicKey) {
-        List<Transaction> sent = transactionRepository.findBySender(publicKey);
-        List<Transaction> received = transactionRepository.findByReceiver(publicKey);
+    private double balance(String name) {
+        List<Transaction> sent = transactionRepository.findBySender(name);
+        List<Transaction> received = transactionRepository.findByReceiver(name);
 
         //add received values to balance and subtract sent values
         double balance = 0;
@@ -124,11 +126,13 @@ class Controller {
 
 class NewTransaction {
     String sender;
+    String senderName;
     String encrypted;
 
-    public NewTransaction(String sender, String encrypted) {
+    public NewTransaction(String sender, String encrypted, String senderName) {
         this.sender = sender;
         this.encrypted = encrypted;
+        this.senderName = senderName;
     }
 }
 
